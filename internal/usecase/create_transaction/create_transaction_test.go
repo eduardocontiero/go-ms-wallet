@@ -1,9 +1,11 @@
-package createtransaction
+package create_transaction
 
 import (
 	"testing"
 
 	"github.com/eduardocontiero/go-ms-wallet/internal/entity"
+	"github.com/eduardocontiero/go-ms-wallet/internal/event"
+	"github.com/eduardocontiero/go-ms-wallet/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -47,13 +49,16 @@ func TestCreateTransactionUseCase_Execute(t *testing.T) {
 	mockTransaction := &TransactionGatewayMock{}
 	mockTransaction.On("Create", mock.Anything).Return(nil)
 
-	inputDto := CreateTransactionInputDto{
+	inputDto := CreateTransactionInputDTO{
 		AccountIDFrom: account1.ID,
 		AccountIDTo:   account2.ID,
 		Amount:        100,
 	}
 
-	uc := NewCreateTransactionUseCase(mockTransaction, mockAccount)
+	dispatcher := events.NewEventDispatcher()
+	event := event.NewTransactionCreated()
+
+	uc := NewCreateTransactionUseCase(mockTransaction, mockAccount, dispatcher, event)
 	output, err := uc.Execute(inputDto)
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
